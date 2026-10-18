@@ -1,0 +1,2532 @@
+<!doctype html>
+<html lang="es" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      LFC Analytics Hub | Jürgen Klopp: ¿Fútbol Salvaje o Control Clínico?
+    </title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+    <!-- Google Fonts: Inter, Plus Jakarta Sans & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              // Paleta Dark Mode (#0F172A solicitada)
+              pitch: {
+                950: "#090D16",
+                900: "#0F172A",
+                800: "#1E293B",
+                700: "#334155",
+              },
+              // Paleta Liverpool Crimson (70-20-10 Accent)
+              lfc: {
+                DEFAULT: "#C8102E",
+                deep: "#8B0D21", // Tono sobrio estilo Bankio
+                darker: "#680817",
+                light: "#E11D48",
+                soft: "#FDF2F4",
+              },
+              // Cabecera de tabla carbón (#111827 estilo Bankio)
+              charcoal: "#111827",
+            },
+            fontFamily: {
+              sans: ["Inter", "sans-serif"],
+              display: ["Plus Jakarta Sans", "sans-serif"],
+              mono: ["JetBrains Mono", "monospace"],
+            },
+          },
+        },
+      };
+    </script>
+
+    <style>
+      /* Transiciones suaves de tema */
+      body,
+      .dash-card,
+      .sidebar-panel,
+      input,
+      button,
+      table,
+      th,
+      td {
+        transition:
+          background-color 0.2s ease,
+          border-color 0.2s ease,
+          color 0.2s ease,
+          box-shadow 0.2s ease;
+      }
+
+      /* Estilo de tarjetas inspirado en Bankio */
+      .dash-card {
+        border-radius: 16px;
+      }
+
+      /* Modo Claro Editorial (Estilo imagen de referencia) */
+      html:not(.dark) body {
+        background-color: #f3f4f6;
+        color: #111827;
+      }
+      html:not(.dark) .dash-card {
+        background-color: #ffffff;
+        border: 1px solid #e5e7eb;
+        box-shadow:
+          0 1px 3px rgba(17, 24, 39, 0.04),
+          0 4px 12px rgba(17, 24, 39, 0.02);
+      }
+      html:not(.dark) .sidebar-panel {
+        background-color: #ffffff;
+        border-right: 1px solid #e5e7eb;
+      }
+
+      /* Modo Oscuro Profesional (#0F172A) */
+      html.dark body {
+        background-color: #0f172a;
+        color: #f8fafc;
+      }
+      html.dark .dash-card {
+        background-color: #1e293b;
+        border: 1px solid rgba(148, 163, 184, 0.14);
+        box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.35);
+      }
+      html.dark .sidebar-panel {
+        background-color: #0b1120;
+        border-right: 1px solid rgba(148, 163, 184, 0.12);
+      }
+
+      /* Scrollbar compacto */
+      ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: rgba(148, 163, 184, 0.35);
+        border-radius: 3px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #c8102e;
+      }
+    </style>
+  </head>
+  <body
+    class="font-sans antialiased selection:bg-lfc selection:text-white min-h-screen flex flex-col lg:flex-row"
+  >
+    <!-- TOAST DE NOTIFICACIÓN (Sin alert) -->
+    <div
+      id="toast-notification"
+      class="fixed bottom-5 right-5 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none max-w-xs bg-charcoal text-white px-4 py-3 rounded-xl shadow-2xl border border-slate-700 flex items-center gap-3"
+    >
+      <span
+        class="w-7 h-7 rounded-lg bg-lfc flex items-center justify-center shrink-0 text-white"
+      >
+        <svg
+          class="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M5 13l4 4L19 7"
+          ></path>
+        </svg>
+      </span>
+      <div>
+        <p id="toast-title" class="text-xs font-bold">Acción completada</p>
+        <p id="toast-message" class="text-[11px] text-slate-300">
+          Archivo generado correctamente.
+        </p>
+      </div>
+    </div>
+
+    <!-- MODAL DE CÓDIGO PYTHON / JUPYTER NOTEBOOK -->
+    <div
+      id="notebook-modal"
+      class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/75 backdrop-blur-sm"
+    >
+      <div
+        class="bg-pitch-900 border border-slate-700 rounded-2xl max-w-3xl w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden text-slate-100"
+      >
+        <div
+          class="flex items-center justify-between px-5 py-3.5 bg-pitch-800 border-b border-slate-700"
+        >
+          <div class="flex items-center gap-2.5">
+            <div class="flex gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-red-500"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+            </div>
+            <span class="font-mono text-xs text-slate-300"
+              >klopp_liverpool_bi_study.ipynb — Python 3.11 + Pandas</span
+            >
+          </div>
+          <button
+            onclick="closeNotebookModal()"
+            class="text-slate-400 hover:text-white p-1 rounded-lg"
+          >
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              ></path>
+            </svg>
+          </button>
+        </div>
+
+        <div
+          class="p-5 overflow-y-auto space-y-4 font-mono text-xs bg-pitch-950"
+        >
+          <div class="border-l-2 border-lfc pl-3.5 py-0.5">
+            <p class="text-slate-400">
+              # [In 1]: Procesamiento de Understat Data (Temporadas 2017/18 vs
+              2019/20)
+            </p>
+            <pre
+              class="text-emerald-400 mt-1.5 overflow-x-auto"
+            ><code>import pandas as pd
+import numpy as np
+
+# Carga de métricas agregadas y cálculo de diferenciales de eficiencia en áreas
+df = pd.read_csv('understat_lfc_1718_1920.csv')
+df['xG_Overperformance'] = (df['Goals'] - df['xG']).round(2)
+df['Alisson_PSxG_Saved'] = (df['xGA'] - df['GA']).round(2)
+
+# Análisis de varianza de goles totales por partido (38 jornadas)
+variance_stats = df.groupby('Season')['Match_Total_Goals'].agg(['mean', 'std', lambda x: (x >= 4).sum()])</code></pre>
+          </div>
+
+          <div class="bg-pitch-800/90 p-3.5 rounded-xl border border-slate-700">
+            <p class="text-amber-400 mb-2 font-semibold">
+              Out [1]: DataFrame Consolidado de los 4 Estudios
+            </p>
+            <table class="w-full text-left border-collapse text-[11px]">
+              <thead>
+                <tr class="border-b border-slate-700 text-slate-400">
+                  <th class="py-1">Temporada</th>
+                  <th class="py-1">Pts</th>
+                  <th class="py-1">Goles (xG)</th>
+                  <th class="py-1">Diff Ataque</th>
+                  <th class="py-1">GA (xGA)</th>
+                  <th class="py-1">Factor GK</th>
+                  <th class="py-1">Std (σ)</th>
+                  <th class="py-1">4+ Goles</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-800 text-slate-200">
+                <tr>
+                  <td class="py-1.5 font-bold text-slate-300">
+                    2017/18 (Heavy Metal)
+                  </td>
+                  <td class="py-1.5">75</td>
+                  <td class="py-1.5">84 (75.2*)</td>
+                  <td class="py-1.5">+7.10</td>
+                  <td class="py-1.5">38 (33.8)</td>
+                  <td class="py-1.5 text-red-400">+4.20 encajados</td>
+                  <td class="py-1.5">1.86</td>
+                  <td class="py-1.5">16 PJ</td>
+                </tr>
+                <tr>
+                  <td class="py-1.5 font-bold text-lfc-light">
+                    2019/20 (Campeón PL)
+                  </td>
+                  <td class="py-1.5 font-bold text-amber-400">99</td>
+                  <td class="py-1.5">85 (75.2)</td>
+                  <td class="py-1.5 text-emerald-400 font-bold">+9.80</td>
+                  <td class="py-1.5">33 (39.6)</td>
+                  <td class="py-1.5 text-emerald-400 font-bold">
+                    -6.60 prevenidos
+                  </td>
+                  <td class="py-1.5">1.56</td>
+                  <td class="py-1.5">13 PJ</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div
+          class="px-5 py-3 bg-pitch-800 border-t border-slate-700 flex items-center justify-between"
+        >
+          <span class="text-[11px] text-slate-400"
+            >Generador directo de Jupyter Notebook (.ipynb) incluido.</span
+          >
+          <div class="flex gap-2">
+            <button
+              onclick="downloadJupyterNotebook()"
+              class="px-3.5 py-1.5 rounded-lg bg-lfc hover:bg-lfc-light text-white text-xs font-semibold flex items-center gap-1.5"
+            >
+              <span>Descargar .ipynb</span>
+            </button>
+            <button
+              onclick="closeNotebookModal()"
+              class="px-3 py-1.5 rounded-lg bg-slate-700 text-slate-200 text-xs"
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =====================================================================
+         1. LEFT SIDEBAR (Estilo compacto Bankio con navegación de 4 estudios)
+         ===================================================================== -->
+    <aside
+      class="sidebar-panel w-full lg:w-64 lg:fixed lg:inset-y-0 lg:left-0 z-30 flex flex-col justify-between shrink-0"
+    >
+      <div>
+        <!-- Brand Header + Mobile Menu Button -->
+        <div
+          class="h-16 px-5 flex items-center justify-between border-b border-slate-200 dark:border-slate-800/80"
+        >
+          <div class="flex items-center gap-2.5">
+            <div
+              class="w-8 h-8 rounded-lg bg-lfc-deep dark:bg-lfc flex items-center justify-center text-white font-display font-extrabold text-sm shadow-sm"
+            >
+              LFC
+            </div>
+            <div>
+              <span
+                class="font-display font-bold text-sm tracking-tight block leading-none"
+                >Analytics<span class="text-lfc dark:text-lfc-light"
+                  >Hub</span
+                ></span
+              >
+              <span class="text-[10px] font-mono text-slate-400"
+                >Klopp Era BI • v2.4</span
+              >
+            </div>
+          </div>
+
+          <!-- Botón colapsable en móvil -->
+          <button
+            onclick="toggleMobileSidebar()"
+            class="lg:hidden p-1.5 rounded-lg border border-slate-300 dark:border-slate-700 text-slate-500 dark:text-slate-300"
+          >
+            <svg
+              class="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 6h16M4 12h16M4 18h16"
+              ></path>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Contenido colapsable en móvil, siempre visible en Desktop -->
+        <div id="sidebar-content" class="hidden lg:block px-3.5 py-4 space-y-5">
+          <!-- MAIN MENU: 4 Análisis Interactivos del Liverpool Campeón -->
+          <div>
+            <p
+              class="px-2.5 text-[10px] font-mono font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2"
+            >
+              Módulos de Análisis (PL)
+            </p>
+            <nav class="space-y-1" id="study-nav">
+              <!-- Estudio 01 -->
+              <button
+                onclick="selectStudyModule('overview')"
+                id="nav-overview"
+                class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold bg-lfc-deep dark:bg-lfc text-white shadow-sm transition text-left"
+              >
+                <span class="flex items-center gap-2.5 truncate">
+                  <svg
+                    class="w-4 h-4 shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
+                    ></path>
+                  </svg>
+                  <span class="truncate">01. Caos vs Control</span>
+                </span>
+                <span
+                  class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/20"
+                  >Base</span
+                >
+              </button>
+
+              <!-- Estudio 02 -->
+              <button
+                onclick="selectStudyModule('attack')"
+                id="nav-attack"
+                class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/70 transition text-left"
+              >
+                <span class="flex items-center gap-2.5 truncate">
+                  <svg
+                    class="w-4 h-4 shrink-0 text-slate-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
+                    ></path>
+                  </svg>
+                  <span class="truncate">02. Letalidad & Tridente</span>
+                </span>
+                <span class="text-[10px] font-mono text-slate-400">+9.8</span>
+              </button>
+
+              <!-- Estudio 03 -->
+              <button
+                onclick="selectStudyModule('alisson')"
+                id="nav-alisson"
+                class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/70 transition text-left"
+              >
+                <span class="flex items-center gap-2.5 truncate">
+                  <svg
+                    class="w-4 h-4 shrink-0 text-slate-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                    ></path>
+                  </svg>
+                  <span class="truncate">03. El Factor Alisson</span>
+                </span>
+                <span class="text-[10px] font-mono text-slate-400">-6.6</span>
+              </button>
+
+              <!-- Estudio 04 -->
+              <button
+                onclick="selectStudyModule('gamestates')"
+                id="nav-gamestates"
+                class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/70 transition text-left"
+              >
+                <span class="flex items-center gap-2.5 truncate">
+                  <svg
+                    class="w-4 h-4 shrink-0 text-slate-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
+                    ></path>
+                  </svg>
+                  <span class="truncate">04. Control del juego & TAA</span>
+                </span>
+                <span class="text-[10px] font-mono text-slate-400">1.56σ</span>
+              </button>
+            </nav>
+          </div>
+
+          <!-- STACK TECNOLÓGICO (Badges solicitados) -->
+          <div>
+            <p
+              class="px-2.5 text-[10px] font-mono font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2"
+            >
+              Stack & Fuente de Datos
+            </p>
+            <div class="px-2 flex flex-wrap gap-1.5">
+              <span
+                class="px-2 py-1 rounded-md text-[11px] font-mono bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
+                >Python</span
+              >
+              <span
+                class="px-2 py-1 rounded-md text-[11px] font-mono bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
+                >Understat Data</span
+              >
+              <span
+                class="px-2 py-1 rounded-md text-[11px] font-mono bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
+                >Pandas</span
+              >
+              <span
+                class="px-2 py-1 rounded-md text-[11px] font-mono bg-lfc/10 text-lfc dark:text-lfc-light border border-lfc/20 font-medium"
+                >Football Analytics</span
+              >
+            </div>
+          </div>
+
+          <!-- ACCIONES DE REPOSITORIO / NOTEBOOK -->
+          <div class="pt-1 space-y-2 px-1">
+            <button
+              onclick="openNotebookModal()"
+              class="w-full py-2 px-3 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-lfc text-xs font-medium flex items-center justify-between text-slate-700 dark:text-slate-200 bg-slate-50/70 dark:bg-slate-800/50"
+            >
+              <span class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                <span>Ver Script Python</span>
+              </span>
+              <span class="font-mono text-[10px] text-slate-400">.py</span>
+            </button>
+            <button
+              onclick="downloadJupyterNotebook()"
+              class="w-full py-2 px-3 rounded-xl bg-charcoal dark:bg-slate-800 hover:bg-lfc-deep dark:hover:bg-lfc text-white text-xs font-medium flex items-center justify-between transition"
+            >
+              <span class="flex items-center gap-2">
+                <svg
+                  class="w-3.5 h-3.5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                  ></path>
+                </svg>
+                <span>Descargar Notebook</span>
+              </span>
+              <span class="font-mono text-[10px] opacity-75">.ipynb</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- PERFIL DEL AUTOR EN EL PIE DEL SIDEBAR -->
+      <div
+        class="p-3.5 border-t border-slate-200 dark:border-slate-800/80 bg-slate-50/50 dark:bg-pitch-950/40"
+      >
+        <div class="flex items-center gap-2.5">
+          <div
+            class="w-9 h-9 rounded-xl bg-gradient-to-br from-lfc-deep to-lfc text-white font-display font-bold text-xs flex items-center justify-center shrink-0 shadow-sm"
+          >
+            EB
+          </div>
+          <div class="min-w-0 flex-1">
+            <p class="text-xs font-bold truncate">Erik Barberon</p>
+            <p class="text-[10px] text-slate-500 dark:text-slate-400 truncate">
+              Prog. Student & Sports Analyst
+            </p>
+          </div>
+        </div>
+        <div class="mt-2.5 flex items-center gap-1.5">
+          <a
+            href="https://github.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="flex-1 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[11px] font-medium text-center hover:border-lfc transition"
+          >
+            GitHub
+          </a>
+          <a
+            href="https://linkedin.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="flex-1 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[11px] font-medium text-center hover:border-lfc transition"
+          >
+            LinkedIn
+          </a>
+        </div>
+      </div>
+    </aside>
+
+    <!-- =====================================================================
+         CONTENEDOR PRINCIPAL DEL DASHBOARD (Con margen izquierdo en Desktop)
+         ===================================================================== -->
+    <main class="flex-1 lg:ml-64 min-w-0">
+      <!-- 2. TOP HEADER COMPACTO (Inspirado en la cabecera de Bankio) -->
+      <header
+        class="sticky top-0 z-20 backdrop-blur-md bg-white/85 dark:bg-pitch-900/85 border-b border-slate-200 dark:border-slate-800/80 px-4 sm:px-6 py-3"
+      >
+        <div
+          class="max-w-[1440px] mx-auto flex flex-col md:flex-row md:items-center justify-between gap-3"
+        >
+          <!-- Saludo / Contexto Superior -->
+          <div class="min-w-0">
+            <div class="flex items-center gap-2">
+              <span
+                class="text-[11px] font-mono uppercase tracking-wider px-2 py-0.5 rounded bg-lfc/10 text-lfc dark:text-lfc-light font-semibold"
+                id="active-module-pill"
+              >
+                Estudio #01 • Premier League
+              </span>
+              <span class="text-xs text-slate-400 hidden sm:inline">•</span>
+              <span
+                class="text-xs text-slate-500 dark:text-slate-400 hidden sm:inline font-mono"
+                >2017/18 vs 2019/20 (38 PJ)</span
+              >
+            </div>
+            <h1
+              id="dashboard-main-title"
+              class="font-display text-lg sm:text-xl font-bold tracking-tight truncate mt-0.5"
+            >
+              Jürgen Klopp: ¿Fútbol Salvaje o Control?
+            </h1>
+          </div>
+
+          <!-- Controles Superiores: Buscador + Toggle P90 + Toggle Tema (Light/Dark) -->
+          <div class="flex flex-wrap items-center gap-2">
+            <!-- Buscador rápido -->
+            <div class="relative flex-1 sm:flex-initial">
+              <input
+                type="text"
+                id="global-search"
+                oninput="filterTableRows()"
+                placeholder="Buscar métrica o jugador..."
+                class="w-full sm:w-48 pl-8 pr-3 py-1.5 rounded-xl text-xs bg-slate-100 dark:bg-pitch-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-lfc"
+              />
+              <svg
+                class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                ></path>
+              </svg>
+            </div>
+
+            <!-- Selector Totales vs P90 -->
+            <div
+              class="inline-flex rounded-xl p-0.5 bg-slate-100 dark:bg-pitch-800 border border-slate-200 dark:border-slate-700"
+            >
+              <button
+                id="btn-mode-total"
+                onclick="switchMetricScale('total')"
+                class="px-2.5 py-1 rounded-lg text-[11px] font-mono font-semibold bg-lfc-deep dark:bg-lfc text-white transition"
+              >
+                Total 38J
+              </button>
+              <button
+                id="btn-mode-p90"
+                onclick="switchMetricScale('p90')"
+                class="px-2.5 py-1 rounded-lg text-[11px] font-mono font-medium text-slate-600 dark:text-slate-300 hover:text-lfc transition"
+              >
+                Por 90'
+              </button>
+            </div>
+
+            <!-- Botón Alternar Tema (Modo Editorial Claro como en la foto vs Dark Mode #0F172A) -->
+            <button
+              onclick="toggleTheme()"
+              id="theme-toggle-btn"
+              title="Cambiar entre Modo Claro (Bankio) y Modo Oscuro (#0F172A)"
+              class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-pitch-800 border border-slate-200 dark:border-slate-700 text-xs font-medium flex items-center gap-1.5 hover:border-lfc transition"
+            >
+              <svg
+                id="icon-sun"
+                class="w-3.5 h-3.5 text-amber-400 hidden dark:inline"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+                ></path>
+              </svg>
+              <svg
+                id="icon-moon"
+                class="w-3.5 h-3.5 text-slate-700 inline dark:hidden"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+                ></path>
+              </svg>
+              <span id="theme-label" class="text-[11px] font-mono"
+                >Modo Claro</span
+              >
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- CUERPO DEL DASHBOARD -->
+      <div class="max-w-[1440px] mx-auto px-4 sm:px-6 py-5 space-y-5">
+        <!-- Subtítulo Dinámico & Pestañas Rápidas de Contexto -->
+        <div
+          class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-1"
+        >
+          <p
+            id="dashboard-subtitle"
+            class="text-xs sm:text-sm text-slate-600 dark:text-slate-300"
+          >
+            Desmitificando el título de Premier League 2019/20 a través de goles
+            esperados (<span
+              class="font-mono font-semibold text-lfc dark:text-lfc-light"
+              >xG</span
+            >), varianza y el
+            <strong class="font-semibold">'Efecto Alisson Becker'</strong>.
+          </p>
+          <div class="flex items-center gap-2 shrink-0">
+            <span class="text-[11px] font-mono text-slate-400"
+              >Vista activa:</span
+            >
+            <span
+              id="scale-indicator"
+              class="text-[11px] font-mono font-semibold px-2 py-0.5 rounded bg-slate-200/80 dark:bg-slate-800 text-slate-700 dark:text-slate-200"
+            >
+              Acumulado 38 Partidos
+            </span>
+          </div>
+        </div>
+
+        <!-- =====================================================================
+                 3. FILA SUPERIOR BENTO KPI (Estructura exacta de la imagen Bankio)
+                    - Col 1-4: 2 Tarjetas Horizontales Apiladas (Letalidad + Alisson)
+                    - Col 5-9: Tarjeta Central con Mini-Sparkline (Control del Caos)
+                    - Col 10-12: Tarjeta Sólida de Acento Carmesí (99 Puntos Campeón)
+                 ===================================================================== -->
+        <section class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
+          <!-- COLUMNA IZQUIERDA APILADA (2 Tarjetas Compactas) -->
+          <div class="lg:col-span-4 flex flex-col justify-between gap-4">
+            <!-- STAT CARD 1: Letalidad Ofensiva -->
+            <div class="dash-card p-4 flex items-center justify-between">
+              <div class="space-y-1">
+                <div class="flex items-center gap-2">
+                  <span
+                    id="kpi1-label"
+                    class="text-xs font-medium text-slate-500 dark:text-slate-400"
+                    >Letalidad Ofensiva (G - xG)</span
+                  >
+                  <span
+                    class="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
+                  >
+                    ↑ Pico
+                  </span>
+                </div>
+                <div class="flex items-baseline gap-2">
+                  <span
+                    id="kpi1-value"
+                    class="font-display text-2xl sm:text-3xl font-extrabold tracking-tight"
+                    >+9.80</span
+                  >
+                  <span id="kpi1-unit" class="text-xs font-mono text-slate-400"
+                    >goles s/xG</span
+                  >
+                </div>
+                <p
+                  id="kpi1-desc"
+                  class="text-[11px] text-slate-500 dark:text-slate-400"
+                >
+                  85 Goles reales vs
+                  <span class="font-mono">75.2 xG</span> (Salah & Mané)
+                </p>
+              </div>
+              <div
+                class="text-right shrink-0 pl-3 border-l border-slate-100 dark:border-slate-800"
+              >
+                <span class="text-[10px] font-mono text-slate-400 block"
+                  >2017/18</span
+                >
+                <span
+                  id="kpi1-prev"
+                  class="text-xs font-mono font-bold text-slate-700 dark:text-slate-200"
+                  >+7.10</span
+                >
+                <span
+                  class="text-[10px] text-emerald-500 block font-mono mt-0.5"
+                  >+38% efic.</span
+                >
+              </div>
+            </div>
+
+            <!-- STAT CARD 2: El Factor Alisson -->
+            <div class="dash-card p-4 flex items-center justify-between">
+              <div class="space-y-1">
+                <div class="flex items-center gap-2">
+                  <span
+                    id="kpi2-label"
+                    class="text-xs font-medium text-slate-500 dark:text-slate-400"
+                    >El Factor Alisson (GA - xGA)</span
+                  >
+                  <span
+                    class="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded bg-lfc/15 text-lfc dark:text-lfc-light"
+                  >
+                    ↓ Prevención
+                  </span>
+                </div>
+                <div class="flex items-baseline gap-2">
+                  <span
+                    id="kpi2-value"
+                    class="font-display text-2xl sm:text-3xl font-extrabold tracking-tight"
+                    >-6.60</span
+                  >
+                  <span id="kpi2-unit" class="text-xs font-mono text-slate-400"
+                    >goles prev.</span
+                  >
+                </div>
+                <p
+                  id="kpi2-desc"
+                  class="text-[11px] text-slate-500 dark:text-slate-400"
+                >
+                  33 Goles recibidos vs
+                  <span class="font-mono">39.6 xGA</span> concedido
+                </p>
+              </div>
+              <div
+                class="text-right shrink-0 pl-3 border-l border-slate-100 dark:border-slate-800"
+              >
+                <span class="text-[10px] font-mono text-slate-400 block"
+                  >2017/18</span
+                >
+                <span
+                  id="kpi2-prev"
+                  class="text-xs font-mono font-bold text-red-500"
+                  >+4.20</span
+                >
+                <span
+                  class="text-[10px] text-emerald-500 block font-mono mt-0.5"
+                  >10.8G netos</span
+                >
+              </div>
+            </div>
+          </div>
+
+          <!-- COLUMNA CENTRAL: Control del Caos + Mini Sparkline (Inspirado en el bloque Revenue de Bankio) -->
+          <div
+            class="lg:col-span-5 dash-card p-4 sm:p-5 flex flex-col justify-between"
+          >
+            <div class="flex items-start justify-between gap-2">
+              <div>
+                <span
+                  id="kpi3-label"
+                  class="text-xs font-medium text-slate-500 dark:text-slate-400 block"
+                  >Control del Caos (Desviación Estándar σ)</span
+                >
+                <div class="flex items-baseline gap-2.5 mt-1">
+                  <span
+                    id="kpi3-value"
+                    class="font-display text-2xl sm:text-3xl font-extrabold tracking-tight"
+                    >1.86 → 1.56</span
+                  >
+                  <span
+                    class="text-[11px] font-mono px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-600 dark:text-amber-400 font-semibold"
+                  >
+                    -16.1% Varianza
+                  </span>
+                </div>
+              </div>
+              <span class="text-[11px] font-mono text-slate-400"
+                >Goles / Partido</span
+              >
+            </div>
+
+            <!-- Contenedor interior gris suave (igual al sub-card de $3,800 en Bankio) -->
+            <div
+              class="mt-3 p-3.5 rounded-xl bg-slate-50 dark:bg-pitch-900/90 border border-slate-200/70 dark:border-slate-800 grid grid-cols-12 gap-3 items-center"
+            >
+              <div class="col-span-6 space-y-1">
+                <span
+                  class="text-[10px] font-mono uppercase tracking-wider text-slate-400 block"
+                  >Partidos Abiertos (4+ Goles)</span
+                >
+                <div class="flex items-baseline gap-2">
+                  <span id="kpi3-subval" class="font-display text-xl font-bold"
+                    >16 → 13</span
+                  >
+                  <span
+                    class="text-[11px] text-emerald-500 font-mono font-semibold"
+                    >(-3 PJ)</span
+                  >
+                </div>
+                <p
+                  id="kpi3-subdesc"
+                  class="text-[11px] text-slate-500 dark:text-slate-400 leading-snug"
+                >
+                  Menos intercambios golpe por golpe; control con posesión.
+                </p>
+              </div>
+              <div class="col-span-6 h-16 relative">
+                <canvas id="sparklineVarianceChart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- COLUMNA DERECHA: Tarjeta Sólida de Acento Liverpool (Inspirada en la tarjeta verde oscuro $15,600 de Bankio) -->
+          <div
+            class="lg:col-span-3 rounded-2xl p-5 bg-gradient-to-br from-lfc-deep via-lfc to-lfc-darker text-white shadow-lg flex flex-col justify-between relative overflow-hidden"
+          >
+            <div
+              class="absolute -right-6 -bottom-6 w-28 h-28 rounded-full bg-white/10 blur-xl pointer-events-none"
+            ></div>
+
+            <div class="flex items-center justify-between">
+              <span id="kpi4-label" class="text-xs font-medium text-red-100"
+                >Eficiencia Campeón 19/20</span
+              >
+              <span
+                class="w-6 h-6 rounded-full bg-white/15 flex items-center justify-center text-[11px] font-mono font-bold"
+                >🏆</span
+              >
+            </div>
+
+            <div class="my-2">
+              <div class="flex items-baseline gap-2">
+                <span
+                  id="kpi4-value"
+                  class="font-display text-3xl sm:text-4xl font-extrabold tracking-tight"
+                  >99 Pts</span
+                >
+                <span
+                  id="kpi4-delta"
+                  class="text-xs font-mono text-amber-300 font-semibold"
+                  >+24 vs 17/18</span
+                >
+              </div>
+              <p
+                id="kpi4-sub"
+                class="text-[11px] text-red-100/90 mt-1 font-mono"
+              >
+                Récord: 32V - 3E - 3D (84.2% Vic.)
+              </p>
+            </div>
+
+            <div
+              class="pt-2.5 border-t border-white/15 flex items-center justify-between text-[11px]"
+            >
+              <span class="text-red-100">Victorias por 1 gol:</span>
+              <span
+                id="kpi4-badge"
+                class="font-mono font-bold bg-black/25 px-2 py-0.5 rounded"
+                >14 PJ (vs 5)</span
+              >
+            </div>
+          </div>
+        </section>
+
+        <!-- =====================================================================
+                 4. FILA MEDIA DE GRÁFICOS (Layout exacto de la imagen Bankio:
+                    - Col 1-5: Tarjeta Izquierda con Gráfico de Anillo y Leyenda Inferior
+                    - Col 6-12: Tarjeta Derecha con Gráfico de Barras Agrupadas y Selector)
+                 ===================================================================== -->
+        <section class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
+          <!-- TARJETA IZQUIERDA (5 Columnas): Gráfico de Anillo + Desglose Inferior -->
+          <div
+            class="lg:col-span-5 dash-card p-5 flex flex-col justify-between"
+          >
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h2
+                  id="donut-card-title"
+                  class="font-display text-sm sm:text-base font-bold"
+                >
+                  Estructura de Marcadores (19/20)
+                </h2>
+                <p
+                  id="donut-card-subtitle"
+                  class="text-[11px] text-slate-500 dark:text-slate-400"
+                >
+                  Distribución de los 38 partidos según control del ritmo
+                </p>
+              </div>
+              <span
+                class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
+                >38 PJ</span
+              >
+            </div>
+
+            <!-- Gráfico de Anillo con Etiqueta Central -->
+            <div
+              class="relative h-48 sm:h-52 my-2 flex items-center justify-center"
+            >
+              <canvas id="doughnutStateChart"></canvas>
+              <div
+                class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center"
+              >
+                <span class="text-[10px] font-mono uppercase text-slate-400"
+                  >Goles ≥ 4</span
+                >
+                <span
+                  id="donut-center-val"
+                  class="font-display text-xl font-extrabold"
+                  >13 PJ</span
+                >
+                <span
+                  id="donut-center-sub"
+                  class="text-[10px] font-mono text-emerald-500"
+                  >vs 16 en 17/18</span
+                >
+              </div>
+            </div>
+
+            <!-- Leyenda Inferior Detallada (Idéntica al listado bajo el anillo en Bankio) -->
+            <div
+              class="space-y-2 pt-3 border-t border-slate-100 dark:border-slate-800/80 text-xs"
+            >
+              <div class="flex items-center justify-between">
+                <span
+                  class="flex items-center gap-2 text-slate-600 dark:text-slate-300"
+                >
+                  <span
+                    class="w-2.5 h-2.5 rounded-full bg-lfc-deep dark:bg-lfc"
+                  ></span>
+                  <span id="legend-label-1">Victorias por 1 Gol (Control)</span>
+                </span>
+                <div class="font-mono flex items-center gap-3">
+                  <span id="legend-val-1" class="font-semibold">14 PJ</span>
+                  <span id="legend-pct-1" class="text-slate-400 w-9 text-right"
+                    >37%</span
+                  >
+                </div>
+              </div>
+              <div class="flex items-center justify-between">
+                <span
+                  class="flex items-center gap-2 text-slate-600 dark:text-slate-300"
+                >
+                  <span
+                    class="w-2.5 h-2.5 rounded-full bg-slate-700 dark:bg-cyan-400"
+                  ></span>
+                  <span id="legend-label-2"
+                    >Victorias Cómodas (Margen 2+ Goles)</span
+                  >
+                </span>
+                <div class="font-mono flex items-center gap-3">
+                  <span id="legend-val-2" class="font-semibold">18 PJ</span>
+                  <span id="legend-pct-2" class="text-slate-400 w-9 text-right"
+                    >47%</span
+                  >
+                </div>
+              </div>
+              <div class="flex items-center justify-between">
+                <span
+                  class="flex items-center gap-2 text-slate-600 dark:text-slate-300"
+                >
+                  <span
+                    class="w-2.5 h-2.5 rounded-full bg-slate-300 dark:bg-amber-400"
+                  ></span>
+                  <span id="legend-label-3"
+                    >Empates / Derrotas (Puntos Cedidos)</span
+                  >
+                </span>
+                <div class="font-mono flex items-center gap-3">
+                  <span id="legend-val-3" class="font-semibold">6 PJ</span>
+                  <span id="legend-pct-3" class="text-slate-400 w-9 text-right"
+                    >16%</span
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TARJETA DERECHA (7 Columnas): Gráfico Principal de Barras Agrupadas con Selector de los 3 Gráficos -->
+          <div
+            class="lg:col-span-7 dash-card p-5 flex flex-col justify-between"
+          >
+            <div
+              class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 mb-3"
+            >
+              <div>
+                <h2
+                  id="main-bar-title"
+                  class="font-display text-sm sm:text-base font-bold"
+                >
+                  Comparativa Interanual: 2017/18 vs 2019/20
+                </h2>
+                <p
+                  id="main-bar-subtitle"
+                  class="text-[11px] text-slate-500 dark:text-slate-400"
+                >
+                  Demostrando que en 19/20 no crearon más ocasiones, sino que
+                  definieron y defendieron áreas mejor
+                </p>
+              </div>
+
+              <!-- Selector tipo Píldora (Como el botón "January v" en Bankio) para alternar los 3 gráficos solicitados -->
+              <div
+                class="inline-flex rounded-xl p-1 bg-slate-100 dark:bg-pitch-900 border border-slate-200 dark:border-slate-700 self-start sm:self-auto shrink-0"
+              >
+                <button
+                  onclick="switchBarChartTab('xg')"
+                  id="tab-btn-xg"
+                  class="px-2.5 py-1 rounded-lg text-[11px] font-mono font-semibold bg-lfc-deep dark:bg-lfc text-white transition"
+                >
+                  1. Goles vs xG
+                </button>
+                <button
+                  onclick="switchBarChartTab('xga')"
+                  id="tab-btn-xga"
+                  class="px-2.5 py-1 rounded-lg text-[11px] font-mono font-medium text-slate-600 dark:text-slate-300 hover:text-lfc transition"
+                >
+                  2. xGA vs GA
+                </button>
+                <button
+                  onclick="switchBarChartTab('chaos')"
+                  id="tab-btn-chaos"
+                  class="px-2.5 py-1 rounded-lg text-[11px] font-mono font-medium text-slate-600 dark:text-slate-300 hover:text-lfc transition"
+                >
+                  3. Caos (4+ G)
+                </button>
+              </div>
+            </div>
+
+            <!-- Lienzo del Gráfico de Barras Principal -->
+            <div class="relative h-60 sm:h-64 w-full">
+              <canvas id="mainGroupedBarChart"></canvas>
+            </div>
+
+            <!-- Nota Analítica Dinámica al pie del gráfico -->
+            <div
+              class="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex flex-wrap items-center justify-between gap-2 text-xs"
+            >
+              <p
+                id="bar-chart-insight"
+                class="text-slate-600 dark:text-slate-300"
+              >
+                <strong class="text-lfc dark:text-lfc-light font-mono"
+                  >Insight #01:</strong
+                >
+                En 19/20 el Liverpool generó
+                <span class="font-mono font-semibold">75.2 xG</span> (menos que
+                los 76.9 de 17/18), pero anotó 85 goles (<span
+                  class="font-mono text-emerald-500 font-bold"
+                  >+9.8 sobre xG</span
+                >).
+              </p>
+              <button
+                onclick="toggleThreeChartsGrid()"
+                class="text-[11px] font-mono font-semibold text-lfc dark:text-lfc-light hover:underline flex items-center gap-1"
+              >
+                <span id="toggle-grid-text"
+                  >Ver los 3 gráficos en simultáneo</span
+                >
+                <span>↓</span>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- PANEL DESPLEGABLE OPCIONAL: LOS 3 GRÁFICOS EN SIMULTÁNEO -->
+        <section
+          id="simultaneous-charts-section"
+          class="hidden grid-cols-1 md:grid-cols-3 gap-4"
+        >
+          <!-- Mini Gráfico 1: Goles vs xG -->
+          <div class="dash-card p-4">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-bold">1. Goles vs xG (Ataque)</span>
+              <span
+                class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-500"
+                >+9.8 Diff</span
+              >
+            </div>
+            <div class="h-44 relative">
+              <canvas id="miniChart1"></canvas>
+            </div>
+          </div>
+          <!-- Mini Gráfico 2: xGA vs GA -->
+          <div class="dash-card p-4">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-bold"
+                >2. Peligro (xGA) vs Goles Recibidos</span
+              >
+              <span
+                class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-lfc/10 text-lfc dark:text-lfc-light"
+                >-6.6 Alisson</span
+              >
+            </div>
+            <div class="h-44 relative">
+              <canvas id="miniChart2"></canvas>
+            </div>
+          </div>
+          <!-- Mini Gráfico 3: Partidos Abiertos -->
+          <div class="dash-card p-4">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-bold"
+                >3. Partidos 4+ Goles & Varianza</span
+              >
+              <span
+                class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-500"
+                >16 → 13 PJ</span
+              >
+            </div>
+            <div class="h-44 relative">
+              <canvas id="miniChart3"></canvas>
+            </div>
+          </div>
+        </section>
+
+        <!-- =====================================================================
+                 5. CONCLUSIONES TÁCTICAS COMPACTAS (Storytelling de los 99 Puntos)
+                 ===================================================================== -->
+        <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div
+            class="dash-card p-4 border-l-4 border-l-lfc-deep dark:border-l-lfc"
+          >
+            <div class="flex items-center justify-between mb-1.5">
+              <span
+                class="text-[10px] font-mono uppercase tracking-wider text-lfc dark:text-lfc-light font-bold"
+                >Conclusión Táctica 01</span
+              >
+              <span class="text-[11px] font-mono text-slate-400"
+                >Game States</span
+              >
+            </div>
+            <h3 class="font-display text-sm font-bold mb-1">
+              Dominio de los Estados del Partido
+            </h3>
+            <p
+              class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed"
+            >
+              En 2017/18 el Liverpool atacaba con vértigo constante aún ganando
+              2-0, exponiéndose a transiciones. En 2019/20, tras anotar el 1-0,
+              enfriaban el partido mediante posesión horizontal, logrando
+              <strong class="font-semibold">14 victorias por 1 gol</strong>.
+            </p>
+          </div>
+
+          <div
+            class="dash-card p-4 border-l-4 border-l-slate-700 dark:border-l-cyan-400"
+          >
+            <div class="flex items-center justify-between mb-1.5">
+              <span
+                class="text-[10px] font-mono uppercase tracking-wider text-slate-600 dark:text-cyan-400 font-bold"
+                >Conclusión Táctica 02</span
+              >
+              <span class="text-[11px] font-mono text-slate-400"
+                >xGA vs GA</span
+              >
+            </div>
+            <h3 class="font-display text-sm font-bold mb-1">
+              La Paradoja de la Línea Alta & Alisson
+            </h3>
+            <p
+              class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed"
+            >
+              Adelantar la línea defensiva con Van Dijk incrementó el peligro
+              concedido a <strong class="font-semibold">39.6 xGA</strong> (vs
+              33.8 en 17/18), pero la élite de
+              <strong class="font-semibold">Alisson Becker</strong> en el 1v1
+              previno 6.6 goles netos (solo 33 encajados).
+            </p>
+          </div>
+
+          <div class="dash-card p-4 border-l-4 border-l-amber-500">
+            <div class="flex items-center justify-between mb-1.5">
+              <span
+                class="text-[10px] font-mono uppercase tracking-wider text-amber-600 dark:text-amber-400 font-bold"
+                >Conclusión Táctica 03</span
+              >
+              <span class="text-[11px] font-mono text-slate-400"
+                >+16.4 G Netos</span
+              >
+            </div>
+            <h3 class="font-display text-sm font-bold mb-1">
+              Sobre-Ejecución en Ambas Áreas
+            </h3>
+            <p
+              class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed"
+            >
+              Los 99 puntos nacieron de un diferencial histórico en las áreas:
+              <strong class="font-semibold">+9.8 goles sobre xG</strong> en
+              definición (Salah/Mané) sumados a
+              <strong class="font-semibold">-6.6 goles evitados</strong> en arco
+              propio (+16.4 goles netos sobre el modelo esperado).
+            </p>
+          </div>
+        </section>
+
+        <!-- =====================================================================
+                 6. TABLA DE ACTIVIDAD Y MÉTRICAS CON CABECERA OSCURA (#111827)
+                    (Inspirada directamente en la segunda pantalla "Transactions Activity" de Bankio)
+                 ===================================================================== -->
+        <section class="dash-card overflow-hidden">
+          <!-- Cabecera de sección de la tabla -->
+          <div
+            class="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800"
+          >
+            <div>
+              <h2 class="font-display text-sm sm:text-base font-bold">
+                Explorador de Datos: Métricas por Bloque Táctico y Jugadores
+                Clave
+              </h2>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400">
+                Comparativa detallada extraída en Python sobre el dataset de
+                Understat (Temporadas 2017/18 vs 2019/20)
+              </p>
+            </div>
+
+            <!-- Filtros rápidos + Exportar CSV -->
+            <div class="flex flex-wrap items-center gap-2">
+              <select
+                id="category-filter"
+                onchange="filterTableRows()"
+                class="px-3 py-1.5 rounded-xl text-xs font-mono bg-slate-100 dark:bg-pitch-900 border border-slate-200 dark:border-slate-700 focus:outline-none"
+              >
+                <option value="all">Todas las Categorías</option>
+                <option value="Ataque">Ataque & Tridente</option>
+                <option value="Defensa">Portería & Defensa</option>
+                <option value="Control">Control & Laterales</option>
+              </select>
+
+              <button
+                onclick="exportTableToCSV()"
+                class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-pitch-900 hover:bg-lfc hover:text-white border border-slate-200 dark:border-slate-700 text-xs font-mono font-medium transition flex items-center gap-1.5"
+              >
+                <svg
+                  class="w-3.5 h-3.5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  ></path>
+                </svg>
+                <span>Exportar CSV</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Tabla Responsiva con Cabecera Carbón (#111827) igual a la imagen de referencia -->
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr
+                  class="bg-charcoal text-white text-[11px] font-mono uppercase tracking-wider"
+                >
+                  <th class="py-3 px-4">Métrica / Protagonista</th>
+                  <th class="py-3 px-4">Unidad Táctica</th>
+                  <th class="py-3 px-4">Temp. 2017/18</th>
+                  <th class="py-3 px-4">Temp. 2019/20</th>
+                  <th class="py-3 px-4">Diferencial / Impacto</th>
+                  <th class="py-3 px-4">Estado Analítico</th>
+                  <th class="py-3 px-4 text-right">Datos</th>
+                </tr>
+              </thead>
+              <tbody
+                id="analytics-table-body"
+                class="divide-y divide-slate-100 dark:divide-slate-800 text-xs"
+              >
+                <!-- Filas inyectadas dinámicamente por JavaScript -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pie de tabla -->
+          <div
+            class="px-4 py-3 bg-slate-50/70 dark:bg-pitch-900/50 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-400 font-mono"
+          >
+            <span id="table-count-label">Mostrando 8 registros tácticos</span>
+            <span>Fuente: Understat API • Procesado con Pandas</span>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <!-- =====================================================================
+         LÓGICA INTERACTIVA DEL BI DASHBOARD (Chart.js + Módulos + Temas)
+         ===================================================================== -->
+    <script>
+      // Estado global del Dashboard
+      let currentModule = "overview"; // 'overview' | 'attack' | 'alisson' | 'gamestates'
+      let currentScale = "total"; // 'total' | 'p90'
+      let currentBarTab = "xg"; // 'xg' | 'xga' | 'chaos'
+      let miniChartsInitialized = false;
+
+      // Instancias de Chart.js
+      let sparklineChart = null;
+      let doughnutChart = null;
+      let mainBarChart = null;
+
+      // Base de datos de los 4 Estudios del Liverpool Campeón
+      const dashboardModules = {
+        overview: {
+          pill: "Estudio #01 • Comparativa Global PL",
+          title: "Jürgen Klopp: ¿Fútbol Salvaje o Control?",
+          subtitle:
+            'Desmitificando el título de Premier League 2019/20 a través de goles esperados (xG), varianza y el "Efecto Alisson Becker".',
+          kpis: {
+            total: {
+              kpi1: {
+                label: "Letalidad Ofensiva (G - xG)",
+                val: "+9.80",
+                unit: "goles s/xG",
+                desc: "85 Goles reales vs 75.2 xG (Salah & Mané)",
+                prev: "+7.10",
+              },
+              kpi2: {
+                label: "El Factor Alisson (GA - xGA)",
+                val: "-6.60",
+                unit: "goles prev.",
+                desc: "33 Goles recibidos vs 39.6 xGA concedido",
+                prev: "+4.20",
+              },
+              kpi3: {
+                label: "Control del Caos (Desviación σ)",
+                val: "1.86 → 1.56",
+                subval: "16 → 13",
+                subdesc: "Reducción de partidos abiertos con 4+ goles.",
+              },
+              kpi4: {
+                label: "Eficiencia Campeón 19/20",
+                val: "99 Pts",
+                delta: "+24 vs 17/18",
+                sub: "Récord: 32V - 3E - 3D (84.2% Vic.)",
+                badge: "14 PJ (vs 5)",
+              },
+            },
+            p90: {
+              kpi1: {
+                label: "Letalidad Ofensiva P90",
+                val: "+0.26",
+                unit: "G-xG / 90",
+                desc: "2.24 Goles/90 vs 1.98 xG/90 en 19/20",
+                prev: "+0.19",
+              },
+              kpi2: {
+                label: "Prevención Alisson P90",
+                val: "-0.17",
+                unit: "GA-xGA / 90",
+                desc: "0.87 GA/90 vs 1.04 xGA/90 concedido",
+                prev: "+0.11",
+              },
+              kpi3: {
+                label: "Varianza de Goles por 90'",
+                val: "1.86σ → 1.56σ",
+                subval: "34% → 42%",
+                subdesc: "Aumento de victorias cerradas por 1 gol.",
+              },
+              kpi4: {
+                label: "Ritmo de Puntos por Partido",
+                val: "2.61 PPG",
+                delta: "+0.64 PPG",
+                sub: "Proyección de dominio sostenido en 38J",
+                badge: "0.37 V1G/90",
+              },
+            },
+          },
+          donut: {
+            title: "Estructura de Marcadores (19/20)",
+            subtitle: "Distribución de los 38 partidos según margen y control",
+            centerVal: "13 PJ",
+            centerSub: "4+ Goles (vs 16)",
+            labels: [
+              "Victorias por 1 Gol (Control Clínico)",
+              "Victorias Cómodas (Margen 2+ Goles)",
+              "Empates / Derrotas (Puntos Cedidos)",
+            ],
+            data: [14, 18, 6],
+            pcts: ["37%", "47%", "16%"],
+          },
+        },
+        attack: {
+          pill: "Estudio #02 • Análisis Ofensivo & Tridente",
+          title: "Letalidad Clínica: Salah, Mané y el Rol de Firmino",
+          subtitle:
+            "Cómo el tridente ofensivo convirtió 75.2 xG en 85 goles reales, maximizando el valor de cada tiro dentro del área.",
+          kpis: {
+            total: {
+              kpi1: {
+                label: "Sadio Mané",
+                val: "+5.50",
+                unit: "goles s/xG",
+                desc: "18 Goles reales con solo 12.5 xG en 19/20",
+                prev: "+0.80",
+              },
+              kpi2: {
+                label: "Mohamed Salah",
+                val: "19 G",
+                unit: "16.3 xG",
+                desc: "+2.70 sobre xG y líder en toques en área",
+                prev: "32 G (17/18)",
+              },
+              kpi3: {
+                label: "Conversión Colectiva sin Penales",
+                val: "12.4% → 14.1%",
+                subval: "0.13 xG/Sh",
+                subdesc: "Selección de tiro más cercana al punto penal.",
+              },
+              kpi4: {
+                label: "Goles de Victoria (Tridente)",
+                val: "21 PJ",
+                delta: "Decisivos",
+                sub: "Partidos destrabados por Salah, Mané o Firmino",
+                badge: "+9.8 G Total",
+              },
+            },
+            p90: {
+              kpi1: {
+                label: "Sadio Mané (Diferencial P90)",
+                val: "+0.18",
+                unit: "G-xG / 90",
+                desc: "0.59 G/90 vs 0.41 xG/90 (Finalización élite)",
+                prev: "+0.03",
+              },
+              kpi2: {
+                label: "Mohamed Salah (Producción P90)",
+                val: "0.89",
+                unit: "G+A / 90",
+                desc: "Consistencia ofensiva en ambas temporadas",
+                prev: "1.18 (17/18)",
+              },
+              kpi3: {
+                label: "Calidad por Disparo",
+                val: "0.11 → 0.13",
+                subval: "15.4 Sh/90",
+                subdesc: "Menos tiros lejanos improductivos.",
+              },
+              kpi4: {
+                label: "Goles Reales por 90 Minutos",
+                val: "2.24 G",
+                delta: "vs 1.98 xG",
+                sub: "Sobre-ejecución sostenida durante 38 fechas",
+                badge: "+0.26 P90",
+              },
+            },
+          },
+          donut: {
+            title: "Aporte de Goles en 2019/20 (85 G)",
+            subtitle:
+              "Distribución ofensiva entre el Tridente y el resto del plantel",
+            centerVal: "46 G",
+            centerSub: "54% Tridente",
+            labels: [
+              "Tridente Ofensivo (Salah, Mané, Firmino)",
+              "Defensas & Laterales (Van Dijk, TAA, Robertson)",
+              "Mediocampo & Rotación (Origi, Ox, Wij)",
+            ],
+            data: [46, 15, 24],
+            pcts: ["54%", "18%", "28%"],
+          },
+        },
+        alisson: {
+          pill: "Estudio #03 • Portería & Línea Alta",
+          title: "El Factor Alisson Becker y la Paradoja del xGA",
+          subtitle:
+            "Por qué el Liverpool concedió más peligro esperado (39.6 xGA) jugando con línea alta, pero recibió apenas 33 goles.",
+          kpis: {
+            total: {
+              kpi1: {
+                label: "Goles Prevenidos (xGA - GA)",
+                val: "-6.60",
+                unit: "prevenidos",
+                desc: "39.6 xGA concedidos vs 33 goles en contra",
+                prev: "+4.20 (17/18)",
+              },
+              kpi2: {
+                label: "Impacto en el arco",
+                val: "10.8 G",
+                unit: "impacto neto",
+                desc: "Salto desde Mignolet/Karius (+4.2) a Alisson (-6.6)",
+                prev: "38 GA",
+              },
+              kpi3: {
+                label: "Porcentaje de Paradas (Save %)",
+                val: "67.2% → 76.8%",
+                subval: "15 Vallas Inv.",
+                subdesc: "Dominio absoluto en situaciones 1v1 al espacio.",
+              },
+              kpi4: {
+                label: "Puntos Ganados bajo Palos",
+                val: "+11 Pts",
+                delta: "Estimación xP",
+                sub: "Victorias por 1 gol sostenidas por Alisson",
+                badge: "33 GA Total",
+              },
+            },
+            p90: {
+              kpi1: {
+                label: "Goles Prevenidos por 90'",
+                val: "-0.17",
+                unit: "GA-xGA / 90",
+                desc: "0.87 Goles recibidos/90 vs 1.04 xGA/90",
+                prev: "+0.11",
+              },
+              kpi2: {
+                label: "Disparos a Puerta Recibidos/90",
+                val: "2.68",
+                unit: "SoT / 90",
+                desc: "Concesión mínima de volumen pero mayor xG/tiro",
+                prev: "2.95",
+              },
+              kpi3: {
+                label: "Altura Media Línea Defensiva",
+                val: "44.2m → 48.6m",
+                subval: "+4.4 metros",
+                subdesc: "Compresión del campo respaldada por Alisson.",
+              },
+              kpi4: {
+                label: "Goles en contra por Partido",
+                val: "0.87 GA",
+                delta: "Líder PL",
+                sub: "Mejor registro defensivo del campeonato 19/20",
+                badge: "-0.13 vs 17/18",
+              },
+            },
+          },
+          donut: {
+            title: "Destino del Peligro Concedido (19/20)",
+            subtitle:
+              "Resolución de los remates francos enfrentados en Premier League",
+            centerVal: "76.8%",
+            centerSub: "Efectividad GK",
+            labels: [
+              "Paradas Clave & Bloqueos en Área",
+              "Goles Encajados en Juego Abierto",
+              "Goles Encajados a Balón Parado",
+            ],
+            data: [67, 26, 7],
+            pcts: ["67%", "26%", "7%"],
+          },
+        },
+        gamestates: {
+          pill: "Estudio #04 • Game States & Laterales",
+          title: "Control de Estados del Partido y Laterales",
+          subtitle:
+            " Alexander-Arnold y Robertson asumieron la creación (25 asistencias)",
+          kpis: {
+            total: {
+              kpi1: {
+                label: "Asistencias TAA + Robertson",
+                val: "25 Ast",
+                unit: "combinadas",
+                desc: "Trent (13) y Robertson (12) como creadores principales",
+                prev: "6 Ast (17/18)",
+              },
+              kpi2: {
+                label: "Victorias por Margen de 1 Gol",
+                val: "14 PJ",
+                unit: "de 32 victorias",
+                desc: "Gestión quirúrgica de ventajas mínimas (1-0 / 2-1)",
+                prev: "5 PJ (17/18)",
+              },
+              kpi3: {
+                label: "Tiempo en Estado Ganador",
+                val: "43% → 58%",
+                subval: "+540 min",
+                subdesc: "Anotar primero y congelar el ritmo con posesión.",
+              },
+              kpi4: {
+                label: "Efectividad Anotando Primero",
+                val: "100% V",
+                delta: "27 de 27 PJ",
+                sub: "Ganaron todos los partidos donde abrieron el marcador",
+                badge: "Control Total",
+              },
+            },
+            p90: {
+              kpi1: {
+                label: "xA Combinado Laterales P90",
+                val: "0.49",
+                unit: "xA / 90",
+                desc: "Progresión por bandas",
+                prev: "0.24",
+              },
+              kpi2: {
+                label: "Pases Progresivos (TAA + Robertson)",
+                val: "18.4",
+                unit: "prog / 90",
+                desc: "Líderes europeos en envíos al área rival",
+                prev: "12.1",
+              },
+              kpi3: {
+                label: "Posesión Media con Ventaja",
+                val: "59.2% → 63.8%",
+                subval: "Posesión Def.",
+                subdesc: "Circulación de seguridad con Fabinho y Wijnaldum.",
+              },
+              kpi4: {
+                label: "Puntos por Partido Anotando 1°",
+                val: "3.00 PPG",
+                delta: "Pleno",
+                sub: "Cero remontadas sufridas tras ponerse 1-0",
+                badge: "Invictos",
+              },
+            },
+          },
+          donut: {
+            title: "Distribución de Minutos por Tiempo de juego",
+            subtitle:
+              "Porcentaje del tiempo total jugado en 2019/20 según marcador",
+            centerVal: "58%",
+            centerSub: "En Ventaja",
+            labels: [
+              "Ganando (Control con Posesión)",
+              "Empatado (Búsqueda Paciente)",
+              "Perdiendo (Remontadas)",
+            ],
+            data: [58, 33, 9],
+            pcts: ["58%", "33%", "9%"],
+          },
+        },
+      };
+
+      // Datos para los 3 Gráficos de Barras Agrupadas solicitados
+      const barChartsCatalog = {
+        xg: {
+          title: "Gráfico 1: Goles Reales vs Goles Esperados (xG)",
+          subtitle:
+            "Demostrando que en 19/20 no crearon más volumen de ocasiones, sino que definieron con precisión",
+          insight:
+            '<strong class="text-lfc dark:text-lfc-light font-mono">Hallazgo Ofensivo:</strong> En 19/20 el xG fue casi idéntico (75.2 vs 76.9), pero la sobre-ejecución subió a <span class="font-mono text-emerald-500 font-bold">+9.8 goles</span>.',
+          labels: ["Temporada 2017/18", 'Temporada 2019/20 ("Campeón PL")'],
+          total: {
+            ds1Label: "Goles Esperados (xG)",
+            ds1Data: [76.9, 75.2],
+            ds2Label: "Goles Reales Anotados (GF)",
+            ds2Data: [84, 85],
+          },
+          p90: {
+            ds1Label: "xG por 90 Minutos",
+            ds1Data: [2.02, 1.98],
+            ds2Label: "Goles Reales por 90 Minutos",
+            ds2Data: [2.21, 2.24],
+          },
+        },
+        xga: {
+          title: "Gráfico 2: Peligro Concedido (xGA) vs Goles Recibidos (GA)",
+          subtitle:
+            "La anomalía Alisson Becker: recibir más peligro esperado por la línea alta pero conceder 5 goles menos",
+          insight:
+            '<strong class="text-lfc dark:text-lfc-light font-mono">El Factor Alisson:</strong> Concedieron <span class="font-mono font-semibold">39.6 xGA</span> en 19/20 (vs 33.8 en 17/18), pero encajaron solo <span class="font-mono text-emerald-500 font-bold">33 goles (-6.6)</span>.',
+          labels: [
+            "Temporada 2017/18 (Pre-Alisson)",
+            "Temporada 2019/20 (Efecto Alisson)",
+          ],
+          total: {
+            ds1Label: "Peligro Concedido (xGA)",
+            ds1Data: [33.8, 39.6],
+            ds2Label: "Goles Reales Recibidos (GA)",
+            ds2Data: [38, 33],
+          },
+          p90: {
+            ds1Label: "xGA Concedido por 90'",
+            ds1Data: [0.89, 1.04],
+            ds2Label: "Goles Recibidos por 90'",
+            ds2Data: [1.0, 0.87],
+          },
+        },
+        chaos: {
+          title: "Gráfico 3: Partidos Abiertos (4+ Goles) y Gestión del Caos",
+          subtitle:
+            "Reducción de partidos descontrolados (de 16 a 13) y explosión de victorias por 1 gol (de 5 a 14)",
+          insight:
+            '<strong class="text-lfc dark:text-lfc-light font-mono">Control de Varianza:</strong> La desviación estándar cayó de <span class="font-mono font-semibold">1.86 a 1.56</span>; cambiaron empates caóticos por victorias 1-0 / 2-1.',
+          labels: [
+            "Partidos con 4+ Goles (Caos)",
+            "Victorias por 1 Gol (Control)",
+            "Empates",
+          ],
+          total: {
+            ds1Label: "Temporada 2017/18 (σ = 1.86)",
+            ds1Data: [16, 5, 12],
+            ds2Label: "Temporada 2019/20 (σ = 1.56)",
+            ds2Data: [13, 14, 3],
+          },
+          p90: {
+            ds1Label: "% sobre 38 PJ (2017/18)",
+            ds1Data: [42.1, 13.2, 31.6],
+            ds2Label: "% sobre 38 PJ (2019/20)",
+            ds2Data: [34.2, 36.8, 7.9],
+          },
+        },
+      };
+
+      // Filas para la Tabla Oscura estilo Bankio
+      const tableRowsData = [
+        {
+          id: "Salah",
+          name: "Mohamed Salah & Sadio Mané",
+          role: "Finalización (Tridente)",
+          category: "Ataque",
+          v1718: "84 G / 76.9 xG",
+          v1920: "85 G / 75.2 xG",
+          diff: "+9.80 Goles s/xG",
+          status: "Overperformance",
+          statusColor: "emerald",
+        },
+        {
+          id: "Alisson",
+          name: "Alisson Becker (Factor GK)",
+          role: "Prevención 1v1 & PSxG",
+          category: "Defensa",
+          v1718: "38 GA / 33.8 xGA",
+          v1920: "33 GA / 39.6 xGA",
+          diff: "-6.60 Goles Prev.",
+          status: "Anomalía",
+          statusColor: "crimson",
+        },
+        {
+          id: "Varianza",
+          name: "Varianza de Goles por Partido",
+          role: "Desviación Estándar (σ)",
+          category: "Control",
+          v1718: "1.86 σ (Alto Caos)",
+          v1920: "1.56 σ (Control)",
+          diff: "-16.1% Volatilidad",
+          status: "Ritmo Dominado",
+          statusColor: "emerald",
+        },
+        {
+          id: "Abiertos",
+          name: "Partidos Abiertos (4+ Goles)",
+          role: "Intercambio Golpe por Golpe",
+          category: "Control",
+          v1718: "16 de 38 Partidos",
+          v1920: "13 de 38 Partidos",
+          diff: "-3 PJ Abiertos",
+          status: "Riesgo Reducido",
+          statusColor: "amber",
+        },
+        {
+          id: "GameStates",
+          name: "Victorias por Margen de 1 Gol",
+          role: "Gestión del ritmo de juego (1-0 / 2-1)",
+          category: "Control",
+          v1718: "5 Victorias cerradas",
+          v1920: "14 Victorias cerradas",
+          diff: "+9 Victorias (+27 Pts)",
+          status: "Clave del Título",
+          statusColor: "crimson",
+        },
+        {
+          id: "Mane",
+          name: "Sadio Mané (Pico Individual)",
+          role: "Extremo Izquierdo • Definición",
+          category: "Ataque",
+          v1718: "10 G / 9.2 xG",
+          v1920: "18 G / 12.5 xG",
+          diff: "+5.50 Goles s/xG",
+          status: "Letalidad Pura",
+          statusColor: "emerald",
+        },
+        {
+          id: "VanDijk",
+          name: "Virgil van Dijk & Línea Alta",
+          role: "Compresión de Campo & Duelos",
+          category: "Defensa",
+          v1718: "14 Partidos (Mitad Temp.)",
+          v1920: "38 PJ (3,420 Minutos)",
+          diff: "74.5% Duelos Aéreos",
+          status: "Pilar Táctico",
+          statusColor: "emerald",
+        },
+        {
+          id: "Laterales",
+          name: "Alexander-Arnold & Robertson",
+          role: "Laterales como Playmakers",
+          category: "Control",
+          v1718: "6 Asistencias comb.",
+          v1920: "25 Asistencias comb.",
+          diff: "+19 Asistencias",
+          status: "Récord PL",
+          statusColor: "crimson",
+        },
+      ];
+
+      // Inicialización al cargar la página
+      window.addEventListener("DOMContentLoaded", () => {
+        updateThemeButtonLabel();
+        initDashboardCharts();
+        renderTableRows(tableRowsData);
+      });
+
+      // Obtener paleta dinámica según si está activo el Modo Claro (Bankio) o Modo Oscuro (#0F172A)
+      function getThemeColors() {
+        const isDark = document.documentElement.classList.contains("dark");
+        return {
+          isDark,
+          textMuted: isDark ? "#94A3B8" : "#6B7280",
+          textPrimary: isDark ? "#F8FAFC" : "#111827",
+          gridLine: isDark
+            ? "rgba(148, 163, 184, 0.1)"
+            : "rgba(17, 24, 39, 0.06)",
+          crimson: isDark ? "#C8102E" : "#8B0D21",
+          secondaryBar: isDark ? "#38BDF8" : "#1F2937",
+          tertiaryBar: isDark ? "#F59E0B" : "#9CA3AF",
+          tooltipBg: isDark ? "#090D16" : "#111827",
+        };
+      }
+
+      function initDashboardCharts() {
+        const colors = getThemeColors();
+
+        // 1. Mini Sparkline en la Tarjeta Central (Varianza por tramos de temporada)
+        const ctxSpark = document
+          .getElementById("sparklineVarianceChart")
+          .getContext("2d");
+        sparklineChart = new Chart(ctxSpark, {
+          type: "line",
+          data: {
+            labels: ["J1-6", "J7-12", "J13-19", "J20-26", "J27-32", "J33-38"],
+            datasets: [
+              {
+                label: "17/18 σ",
+                data: [2.1, 1.9, 1.95, 1.85, 1.75, 1.86],
+                borderColor: colors.textMuted,
+                borderDash: [3, 3],
+                borderWidth: 1.5,
+                pointRadius: 0,
+                tension: 0.4,
+              },
+              {
+                label: "19/20 σ",
+                data: [1.65, 1.52, 1.48, 1.42, 1.55, 1.56],
+                borderColor: colors.crimson,
+                backgroundColor: "rgba(200, 16, 46, 0.12)",
+                fill: true,
+                borderWidth: 2,
+                pointRadius: 2,
+                tension: 0.4,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false }, tooltip: { enabled: true } },
+            scales: {
+              x: { display: false },
+              y: { display: false, min: 1.2, max: 2.3 },
+            },
+          },
+        });
+
+        // 2. Gráfico de Anillo (Izquierda)
+        const ctxDonut = document
+          .getElementById("doughnutStateChart")
+          .getContext("2d");
+        doughnutChart = new Chart(ctxDonut, {
+          type: "doughnut",
+          data: {
+            labels: dashboardModules.overview.donut.labels,
+            datasets: [
+              {
+                data: dashboardModules.overview.donut.data,
+                backgroundColor: [
+                  colors.crimson,
+                  colors.secondaryBar,
+                  colors.tertiaryBar,
+                ],
+                borderWidth: 0,
+                hoverOffset: 4,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: "74%",
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                backgroundColor: colors.tooltipBg,
+                padding: 10,
+                cornerRadius: 8,
+              },
+            },
+          },
+        });
+
+        // 3. Gráfico Principal de Barras Agrupadas (Derecha)
+        const ctxBar = document
+          .getElementById("mainGroupedBarChart")
+          .getContext("2d");
+        const initialBar = barChartsCatalog.xg.total;
+        mainBarChart = new Chart(ctxBar, {
+          type: "bar",
+          data: {
+            labels: barChartsCatalog.xg.labels,
+            datasets: [
+              {
+                label: initialBar.ds1Label,
+                data: initialBar.ds1Data,
+                backgroundColor: colors.secondaryBar,
+                borderRadius: 8,
+                barPercentage: 0.55,
+                categoryPercentage: 0.55,
+              },
+              {
+                label: initialBar.ds2Label,
+                data: initialBar.ds2Data,
+                backgroundColor: colors.crimson,
+                borderRadius: 8,
+                barPercentage: 0.55,
+                categoryPercentage: 0.55,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: "index", intersect: false },
+            plugins: {
+              legend: {
+                position: "top",
+                align: "end",
+                labels: {
+                  color: colors.textPrimary,
+                  usePointStyle: true,
+                  pointStyle: "circle",
+                  boxWidth: 8,
+                  font: { size: 11, weight: "600" },
+                },
+              },
+              tooltip: {
+                backgroundColor: colors.tooltipBg,
+                padding: 12,
+                cornerRadius: 10,
+              },
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                grid: { color: colors.gridLine },
+                ticks: {
+                  color: colors.textMuted,
+                  font: { family: "JetBrains Mono", size: 11 },
+                },
+              },
+              x: {
+                grid: { display: false },
+                ticks: {
+                  color: colors.textPrimary,
+                  font: { size: 11, weight: "600" },
+                },
+              },
+            },
+          },
+        });
+      }
+
+      // Cambiar entre los 4 Estudios desde el Menú Lateral
+      function selectStudyModule(moduleKey) {
+        currentModule = moduleKey;
+        const mod = dashboardModules[moduleKey];
+
+        // Actualizar estilos del menú lateral
+        ["overview", "attack", "alisson", "gamestates"].forEach((key) => {
+          const btn = document.getElementById("nav-" + key);
+          if (key === moduleKey) {
+            btn.className =
+              "w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold bg-lfc-deep dark:bg-lfc text-white shadow-sm transition text-left";
+          } else {
+            btn.className =
+              "w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/70 transition text-left";
+          }
+        });
+
+        // Actualizar Textos Superiores
+        document.getElementById("active-module-pill").textContent = mod.pill;
+        document.getElementById("dashboard-main-title").textContent = mod.title;
+        document.getElementById("dashboard-subtitle").textContent =
+          mod.subtitle;
+
+        // Actualizar KPIs según escala actual
+        updateKPIsView();
+
+        // Actualizar Donut Chart
+        document.getElementById("donut-card-title").textContent =
+          mod.donut.title;
+        document.getElementById("donut-card-subtitle").textContent =
+          mod.donut.subtitle;
+        document.getElementById("donut-center-val").textContent =
+          mod.donut.centerVal;
+        document.getElementById("donut-center-sub").textContent =
+          mod.donut.centerSub;
+
+        for (let i = 0; i < 3; i++) {
+          document.getElementById(`legend-label-${i + 1}`).textContent =
+            mod.donut.labels[i];
+          document.getElementById(`legend-val-${i + 1}`).textContent =
+            mod.donut.data[i] + (moduleKey === "overview" ? " PJ" : "");
+          document.getElementById(`legend-pct-${i + 1}`).textContent =
+            mod.donut.pcts[i];
+        }
+
+        doughnutChart.data.labels = mod.donut.labels;
+        doughnutChart.data.datasets[0].data = mod.donut.data;
+        doughnutChart.update();
+
+        // Sincronizar pestaña del gráfico de barras con el módulo elegido
+        if (moduleKey === "attack") switchBarChartTab("xg");
+        else if (moduleKey === "alisson") switchBarChartTab("xga");
+        else if (moduleKey === "gamestates") switchBarChartTab("chaos");
+        else switchBarChartTab("xg");
+
+        // Filtrar automáticamente la tabla inferior según el estudio seleccionado
+        const categorySelect = document.getElementById("category-filter");
+        if (moduleKey === "attack") categorySelect.value = "Ataque";
+        else if (moduleKey === "alisson") categorySelect.value = "Defensa";
+        else if (moduleKey === "gamestates") categorySelect.value = "Control";
+        else categorySelect.value = "all";
+        filterTableRows();
+      }
+
+      // Actualizar valores de las 4 tarjetas KPI Bento
+      function updateKPIsView() {
+        const kpiSet = dashboardModules[currentModule].kpis[currentScale];
+
+        document.getElementById("kpi1-label").textContent = kpiSet.kpi1.label;
+        document.getElementById("kpi1-value").textContent = kpiSet.kpi1.val;
+        document.getElementById("kpi1-unit").textContent = kpiSet.kpi1.unit;
+        document.getElementById("kpi1-desc").textContent = kpiSet.kpi1.desc;
+        document.getElementById("kpi1-prev").textContent = kpiSet.kpi1.prev;
+
+        document.getElementById("kpi2-label").textContent = kpiSet.kpi2.label;
+        document.getElementById("kpi2-value").textContent = kpiSet.kpi2.val;
+        document.getElementById("kpi2-unit").textContent = kpiSet.kpi2.unit;
+        document.getElementById("kpi2-desc").textContent = kpiSet.kpi2.desc;
+        document.getElementById("kpi2-prev").textContent = kpiSet.kpi2.prev;
+
+        document.getElementById("kpi3-label").textContent = kpiSet.kpi3.label;
+        document.getElementById("kpi3-value").textContent = kpiSet.kpi3.val;
+        document.getElementById("kpi3-subval").textContent = kpiSet.kpi3.subval;
+        document.getElementById("kpi3-subdesc").textContent =
+          kpiSet.kpi3.subdesc;
+
+        document.getElementById("kpi4-label").textContent = kpiSet.kpi4.label;
+        document.getElementById("kpi4-value").textContent = kpiSet.kpi4.val;
+        document.getElementById("kpi4-delta").textContent = kpiSet.kpi4.delta;
+        document.getElementById("kpi4-sub").textContent = kpiSet.kpi4.sub;
+        document.getElementById("kpi4-badge").textContent = kpiSet.kpi4.badge;
+      }
+
+      // Alternar entre Totales (38 PJ) y Por 90 Minutos (P90)
+      function switchMetricScale(scale) {
+        currentScale = scale;
+        const btnTotal = document.getElementById("btn-mode-total");
+        const btnP90 = document.getElementById("btn-mode-p90");
+        const indicator = document.getElementById("scale-indicator");
+
+        if (scale === "total") {
+          btnTotal.className =
+            "px-2.5 py-1 rounded-lg text-[11px] font-mono font-semibold bg-lfc-deep dark:bg-lfc text-white transition";
+          btnP90.className =
+            "px-2.5 py-1 rounded-lg text-[11px] font-mono font-medium text-slate-600 dark:text-slate-300 hover:text-lfc transition";
+          indicator.textContent = "Acumulado 38 Partidos";
+        } else {
+          btnP90.className =
+            "px-2.5 py-1 rounded-lg text-[11px] font-mono font-semibold bg-lfc-deep dark:bg-lfc text-white transition";
+          btnTotal.className =
+            "px-2.5 py-1 rounded-lg text-[11px] font-mono font-medium text-slate-600 dark:text-slate-300 hover:text-lfc transition";
+          indicator.textContent = "Promedio por 90 Minutos (P90)";
+        }
+
+        updateKPIsView();
+        switchBarChartTab(currentBarTab);
+      }
+
+      // Cambiar entre los 3 Gráficos de Barras en el panel derecho
+      function switchBarChartTab(tabKey) {
+        currentBarTab = tabKey;
+        ["xg", "xga", "chaos"].forEach((k) => {
+          const btn = document.getElementById("tab-btn-" + k);
+          if (k === tabKey) {
+            btn.className =
+              "px-2.5 py-1 rounded-lg text-[11px] font-mono font-semibold bg-lfc-deep dark:bg-lfc text-white transition";
+          } else {
+            btn.className =
+              "px-2.5 py-1 rounded-lg text-[11px] font-mono font-medium text-slate-600 dark:text-slate-300 hover:text-lfc transition";
+          }
+        });
+
+        const chartSpec = barChartsCatalog[tabKey];
+        const scaleData = chartSpec[currentScale];
+
+        document.getElementById("main-bar-title").textContent = chartSpec.title;
+        document.getElementById("main-bar-subtitle").textContent =
+          chartSpec.subtitle;
+        document.getElementById("bar-chart-insight").innerHTML =
+          chartSpec.insight;
+
+        mainBarChart.data.labels = chartSpec.labels;
+        mainBarChart.data.datasets[0].label = scaleData.ds1Label;
+        mainBarChart.data.datasets[0].data = scaleData.ds1Data;
+        mainBarChart.data.datasets[1].label = scaleData.ds2Label;
+        mainBarChart.data.datasets[1].data = scaleData.ds2Data;
+        mainBarChart.update();
+      }
+
+      // Mostrar u ocultar la fila con los 3 gráficos simultáneos
+      function toggleThreeChartsGrid() {
+        const grid = document.getElementById("simultaneous-charts-section");
+        const label = document.getElementById("toggle-grid-text");
+        const colors = getThemeColors();
+
+        if (grid.classList.contains("hidden")) {
+          grid.classList.remove("hidden");
+          grid.classList.add("grid");
+          label.textContent = "Ocultar vista simultánea";
+
+          if (!miniChartsInitialized) {
+            const commonOpts = {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  labels: {
+                    color: colors.textMuted,
+                    boxWidth: 8,
+                    font: { size: 10 },
+                  },
+                },
+              },
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  grid: { color: colors.gridLine },
+                  ticks: { color: colors.textMuted, font: { size: 10 } },
+                },
+                x: {
+                  grid: { display: false },
+                  ticks: { color: colors.textPrimary, font: { size: 10 } },
+                },
+              },
+            };
+
+            new Chart(document.getElementById("miniChart1").getContext("2d"), {
+              type: "bar",
+              data: {
+                labels: ["2017/18", "2019/20"],
+                datasets: [
+                  {
+                    label: "xG",
+                    data: [76.9, 75.2],
+                    backgroundColor: colors.secondaryBar,
+                    borderRadius: 5,
+                  },
+                  {
+                    label: "Goles",
+                    data: [84, 85],
+                    backgroundColor: colors.crimson,
+                    borderRadius: 5,
+                  },
+                ],
+              },
+              options: commonOpts,
+            });
+
+            new Chart(document.getElementById("miniChart2").getContext("2d"), {
+              type: "bar",
+              data: {
+                labels: ["2017/18", "2019/20"],
+                datasets: [
+                  {
+                    label: "xGA",
+                    data: [33.8, 39.6],
+                    backgroundColor: colors.secondaryBar,
+                    borderRadius: 5,
+                  },
+                  {
+                    label: "Goles Rec.",
+                    data: [38, 33],
+                    backgroundColor: "#10B981",
+                    borderRadius: 5,
+                  },
+                ],
+              },
+              options: commonOpts,
+            });
+
+            new Chart(document.getElementById("miniChart3").getContext("2d"), {
+              type: "bar",
+              data: {
+                labels: ["4+ Goles", "Vict. 1 Gol"],
+                datasets: [
+                  {
+                    label: "17/18 (1.86σ)",
+                    data: [16, 5],
+                    backgroundColor: colors.secondaryBar,
+                    borderRadius: 5,
+                  },
+                  {
+                    label: "19/20 (1.56σ)",
+                    data: [13, 14],
+                    backgroundColor: colors.crimson,
+                    borderRadius: 5,
+                  },
+                ],
+              },
+              options: commonOpts,
+            });
+
+            miniChartsInitialized = true;
+          }
+        } else {
+          grid.classList.add("hidden");
+          grid.classList.remove("grid");
+          label.textContent = "Ver los 3 gráficos en simultáneo";
+        }
+      }
+
+      // Renderizar filas de la tabla con cabecera oscura (#111827)
+      function renderTableRows(rows) {
+        const tbody = document.getElementById("analytics-table-body");
+        tbody.innerHTML = "";
+
+        rows.forEach((r) => {
+          let badgeClass =
+            "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400";
+          if (r.statusColor === "crimson")
+            badgeClass = "bg-lfc/15 text-lfc dark:text-lfc-light";
+          if (r.statusColor === "amber")
+            badgeClass = "bg-amber-500/15 text-amber-600 dark:text-amber-400";
+
+          const tr = document.createElement("tr");
+          tr.className =
+            "hover:bg-slate-50 dark:hover:bg-slate-800/50 transition";
+          tr.innerHTML = `
+                    <td class="py-3 px-4">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-7 h-7 rounded-full bg-charcoal dark:bg-slate-700 text-white font-mono text-[10px] font-bold flex items-center justify-center shrink-0">
+                                ${r.name.substring(0, 2).toUpperCase()}
+                            </div>
+                            <div>
+                                <p class="font-semibold text-slate-900 dark:text-white">${r.name}</p>
+                                <p class="text-[11px] text-slate-400">${r.role}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="py-3 px-4 font-mono text-[11px] text-slate-500 dark:text-slate-400">${r.category}</td>
+                    <td class="py-3 px-4 font-mono text-slate-600 dark:text-slate-300">${r.v1718}</td>
+                    <td class="py-3 px-4 font-mono font-semibold text-slate-900 dark:text-white">${r.v1920}</td>
+                    <td class="py-3 px-4 font-mono font-bold text-lfc dark:text-lfc-light">${r.diff}</td>
+                    <td class="py-3 px-4">
+                        <span class="px-2 py-0.5 rounded-md font-mono text-[10px] font-semibold ${badgeClass}">
+                            ${r.status}
+                        </span>
+                    </td>
+                    <td class="py-3 px-4 text-right font-mono text-[11px]">
+                        <button onclick="openNotebookModal()" class="text-slate-400 hover:text-lfc underline">Python</button>
+                    </td>
+                `;
+          tbody.appendChild(tr);
+        });
+
+        document.getElementById("table-count-label").textContent =
+          `Mostrando ${rows.length} registros tácticos`;
+      }
+
+      // Filtro en tiempo real por texto y categoría
+      function filterTableRows() {
+        const q = document
+          .getElementById("global-search")
+          .value.toLowerCase()
+          .trim();
+        const cat = document.getElementById("category-filter").value;
+
+        const filtered = tableRowsData.filter((item) => {
+          const matchesCat = cat === "all" || item.category === cat;
+          const matchesQuery =
+            item.name.toLowerCase().includes(q) ||
+            item.role.toLowerCase().includes(q) ||
+            item.diff.toLowerCase().includes(q);
+          return matchesCat && matchesQuery;
+        });
+
+        renderTableRows(filtered);
+      }
+
+      // Alternar entre Modo Claro Editorial (Estilo Bankio) y Modo Oscuro (#0F172A)
+      function toggleTheme() {
+        const htmlEl = document.documentElement;
+        htmlEl.classList.toggle("dark");
+        updateThemeButtonLabel();
+
+        // Actualizar colores de los gráficos
+        const colors = getThemeColors();
+
+        if (mainBarChart) {
+          mainBarChart.data.datasets[0].backgroundColor = colors.secondaryBar;
+          mainBarChart.data.datasets[1].backgroundColor = colors.crimson;
+          mainBarChart.options.scales.x.ticks.color = colors.textPrimary;
+          mainBarChart.options.scales.y.ticks.color = colors.textMuted;
+          mainBarChart.options.scales.y.grid.color = colors.gridLine;
+          mainBarChart.options.plugins.legend.labels.color = colors.textPrimary;
+          mainBarChart.update();
+        }
+
+        if (doughnutChart) {
+          doughnutChart.data.datasets[0].backgroundColor = [
+            colors.crimson,
+            colors.secondaryBar,
+            colors.tertiaryBar,
+          ];
+          doughnutChart.update();
+        }
+      }
+
+      function updateThemeButtonLabel() {
+        const isDark = document.documentElement.classList.contains("dark");
+        document.getElementById("theme-label").textContent = isDark
+          ? "Modo Claro"
+          : "Modo Oscuro";
+      }
+
+      // Menú móvil
+      function toggleMobileSidebar() {
+        const content = document.getElementById("sidebar-content");
+        content.classList.toggle("hidden");
+      }
+
+      // Modal de Código Python
+      function openNotebookModal() {
+        const m = document.getElementById("notebook-modal");
+        m.classList.remove("hidden");
+        m.classList.add("flex");
+      }
+
+      function closeNotebookModal() {
+        const m = document.getElementById("notebook-modal");
+        m.classList.add("hidden");
+        m.classList.remove("flex");
+      }
+
+      // Exportar tabla a CSV
+      function exportTableToCSV() {
+        const headers = [
+          "Protagonista,Rol,Categoria,2017_18,2019_20,Impacto,Estado",
+        ];
+        const rows = tableRowsData.map(
+          (r) =>
+            `"${r.name}","${r.role}","${r.category}","${r.v1718}","${r.v1920}","${r.diff}","${r.status}"`,
+        );
+        const csvString = headers.concat(rows).join("\n");
+
+        const blob = new Blob([csvString], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "liverpool_analytics_1718_vs_1920.csv";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        showToast(
+          "CSV Exportado",
+          "Se descargó liverpool_analytics_1718_vs_1920.csv",
+        );
+      }
+
+      // Generar y descargar archivo Jupyter Notebook (.ipynb)
+      function downloadJupyterNotebook() {
+        const nb = {
+          cells: [
+            {
+              cell_type: "markdown",
+              metadata: {},
+              source: [
+                "# LFC Analytics Hub: ¿Fútbol Salvaje o Control ?\n",
+                "**Autor:** Erik Barberon — Estudiante de Programación & Sports Analyst\n",
+                "\n",
+                "Estudio en Python comparando las temporadas 2017/18 y 2019/20 del Liverpool FC con datos de Understat.",
+              ],
+            },
+            {
+              cell_type: "code",
+              execution_count: 1,
+              metadata: {},
+              outputs: [],
+              source: [
+                "import pandas as pd\n",
+                "df = pd.DataFrame({\n",
+                "    'Season': ['2017/18', '2019/20'],\n",
+                "    'Points': [75, 99],\n",
+                "    'Goals': [84, 85],\n",
+                "    'xG': [76.9, 75.2],\n",
+                "    'GA': [38, 33],\n",
+                "    'xGA': [33.8, 39.6],\n",
+                "    'Goals_Std_Dev': [1.86, 1.56],\n",
+                "    'Open_Matches_4Plus': [16, 13]\n",
+                "})\n",
+                "df['Attack_Overperformance'] = (df['Goals'] - df['xG']).round(1)\n",
+                "df['Alisson_Effect'] = (df['GA'] - df['xGA']).round(1)\n",
+                "print(df)",
+              ],
+            },
+          ],
+          metadata: {
+            kernelspec: {
+              display_name: "Python 3",
+              language: "python",
+              name: "python3",
+            },
+          },
+          nbformat: 4,
+          nbformat_minor: 5,
+        };
+
+        const blob = new Blob([JSON.stringify(nb, null, 2)], {
+          type: "application/json",
+        });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "klopp_liverpool_bi_dashboard_study.ipynb";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        showToast(
+          "Notebook Descargado",
+          "klopp_liverpool_bi_dashboard_study.ipynb listo.",
+        );
+      }
+
+      function showToast(title, message) {
+        const toast = document.getElementById("toast-notification");
+        document.getElementById("toast-title").textContent = title;
+        document.getElementById("toast-message").textContent = message;
+        toast.classList.remove("translate-y-24", "opacity-0");
+        toast.classList.add("translate-y-0", "opacity-100");
+        setTimeout(() => {
+          toast.classList.remove("translate-y-0", "opacity-100");
+          toast.classList.add("translate-y-24", "opacity-0");
+        }, 3500);
+      }
+    </script>
+  </body>
+</html>
