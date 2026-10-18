@@ -1,0 +1,25 @@
+{
+    "project": "Liverpool Klopp: Heavy Metal vs Campeon",
+    "seasons": {
+        "1718": {
+            "goals_for": 84,
+            "xg_for": 77.5,
+            "goals_against": 38,
+            "xg_against": 35.8,
+            "std_goals": 1.86,
+            "matches_4plus_goals": 16,
+            "diff_ataque": 6.5,
+            "diff_defensa": 2.2
+        },
+        "1920": {
+            "goals_for": 85,
+            "xg_for": 75.2,
+            "goals_against": 33,
+            "xg_against": 39.6,
+            "std_goals": 1.56,
+            "matches_4plus_goals": 13,
+            "diff_ataque": 9.8,
+            "diff_defensa": -6.6
+        }
+    }
+}
