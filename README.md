@@ -1,34 +1,48 @@
-# ⚽ Football Analytics Lab & Business Intelligence Hub
+<div align="center">
 
-[![Live Demo](https://img.shields.io/badge/Demo-GitHub%20Pages-emerald?style=for-the-badge&logo=githubpages&logoColor=white)](https://TU-USUARIO.github.io/NOMBRE-DE-TU-REPOSITORIO/)
-[![Python](https://img.shields.io/badge/Python-3.11-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
-[![Pandas](https://img.shields.io/badge/Pandas-Data%20Analysis-150458?style=for-the-badge&logo=pandas&logoColor=white)](https://pandas.pydata.org/)
-[![Chart.js](https://img.shields.io/badge/Chart.js-Data%20Viz-FF6384?style=for-the-badge&logo=chartdotjs&logoColor=white)](https://www.chartjs.org/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-Modern_UI-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+# ⚽ Football Analytics Lab
+### Sports Science, Quantitative Modeling & BI Dashboards
 
-> Repositorio centralizado para el modelado, análisis cuantitativo y visualización interactiva de datos de fútbol profesional. Cada investigación integra pipelines de extracción (ETL), cálculo de métricas avanzadas (*Expected Goals [xG]*, varianza, *Game States*) y dashboards interactivos diseñados para la toma de decisiones técnicas.
+Un ecosistema modular para el análisis cuantitativo y visualización interactiva de rendimiento en fútbol profesional.  
+Cada investigación integra extracción de datos en **Python**, modelado estadístico (*Expected Goals*, varianza, *Game States*) y dashboards en **Chart.js** y **Tailwind CSS**.
 
 ---
 
-## 📌 Acceso Rápido a las Investigaciones
+[![Live Demo](https://img.shields.io/badge/Demo-GitHub%20Pages-059669?style=for-the-badge&logo=githubpages&logoColor=white)](https://<tu-usuario>.github.io/<nombre-repo>/)
+[![Python](https://img.shields.io/badge/Python-3.11-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![Pandas](https://img.shields.io/badge/Pandas-2.0+-150458?style=for-the-badge&logo=pandas&logoColor=white)](https://pandas.pydata.org/)
+[![Chart.js](https://img.shields.io/badge/Chart.js-4.4-FF6384?style=for-the-badge&logo=chartdotjs&logoColor=white)](https://www.chartjs.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.0+-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 
-| ID | Título del Estudio | Foco Analítico | Dataset | Estado |
+[Dashboard en Vivo](https://<tu-usuario>.github.io/<nombre-repo>/) • [Dataset Abierto](#-datasets) • [Metodología](#️-stack-tecnológico)
+
+---
+
+</div>
+
+## 📑 Catálogo de Investigaciones
+
+| ID | Proyecto | Foco Analítico | Muestra | Estado | Enlaces |
 | :---: | :--- | :--- | :---: | :---: | :---: |
-| **#01** | **Jürgen Klopp: Del Caos al Control Clínico** | Varianza, Sobre-ejecución de xG y el *Efecto Alisson* | 76 Partidos (17/18 vs 19/20) | ✅ Completado
+| **01** | **Jürgen Klopp: ¿Caos o Control?** | Sobre-ejecución xG, Efecto Alisson y Varianza | 76 Fechas Premier League | `Completado` | [Dashboard](https://<tu-usuario>.github.io/<nombre-repo>/studies/01-liverpool-klopp/index.html) · [Notebook](./studies/01-liverpool-klopp/analysis.ipynb) |
+| **02** | **Radar Sub-23: Extremos en Sudamérica** | Scouting predictivo, carreras progresivas y SCA | LPF / Brasileirão / CONMEBOL | `En Desarrollo` | *Próximamente* |
+| **03** | **Presión Alta e Intensidad PPDA** | Bloque alto, recuperaciones y peligro generado | Top 5 Ligas Europeas | `Roadmap` | *Próximamente* |
+
 ---
 
 ## 🔬 Estudio Destacado: Liverpool FC (17/18 vs 19/20)
 
-### ¿Fútbol Salvaje o Dominio Clínico?
-Este estudio desmitifica cuantitativamente la campaña de los **99 puntos** de la Premier League 2019/20 comparada con el pico del "Heavy Metal Football" de 2017/18:
+### *Desmitificando el título de los 99 puntos a través de xG, varianza y estados del partido*
 
-* **Letalidad Ofensiva (+9.80 Goles sobre xG):** El Liverpool no generó más ocasiones que en 2017/18 (75.2 xG vs 84.6 xG), sino que registró una finalización clínica de Salah y Mané, convirtiendo 85 goles a partir de oportunidades de menor volumen pero mayor calidad relativa.
-* **El Factor Alisson Becker (-6.60 xGA vs Goles Recibidos):** A pesar de conceder más peligro esperado (39.6 xGA en 19/20 frente a 35.8 xGA en 17/18), recibieron 5 goles reales menos (33 vs 38), demostrando la eficiencia decisiva del arquero brasileño en paradas de alto valor.
-* **Control del Caos y Desviación Estándar:** La desviación estándar de goles por partido se redujo drásticamente de **1.86 a 1.56**, reflejando la transformación del equipo: de partidos descontrolados y de ida y vuelta a un control riguroso de los estados de partido (*Game States*) y victorias por la mínima ventaja (14 triunfos por 1 gol de diferencia).
+Este estudio compara cuantitativamente dos versiones del Liverpool de Jürgen Klopp: El liverpool del (2017/18) frente al equipo que levantó la Premier League tras 30 años (2019/20).
 
-* 👤 Autor: Erik Barberon
-Estudiante de Programación & Aspirante a Sports Data Analyst
-Mar del Plata, Argentina.
-🌐 Portfolio Live: https://erikbarberon.github.io/football-analytics-lab/
+### Hallazgos Principales:
 
-Datos provistos con fines analíticos y educativos a partir de registros abiertos de Understat.
+* **Letalidad Ofensiva (+9.80 G-xG):**  
+  En 2019/20 el equipo **no generó más peligro** (su $xG$ cayó de $84.6$ a $75.2$), sino que registró un pico histórico de finalización en Mohamed Salah y Sadio Mané, convirtiendo casi 10 goles por encima de la probabilidad de tiro.
+* **El "Efecto Alisson Becker" (-6.60 xGA vs GA):**  
+  Pese a conceder $3.8$ unidades más de peligro esperado ($39.6$ vs $35.8$ $xGA$), recibieron 5 goles reales menos. La presencia de Alisson neutralizó situaciones de mano a mano de alto valor.
+* **Control del Caos y Varianza ($\sigma: 1.86 \rightarrow 1.56$):**  
+  Se redujeron los partidos de marcador desbordado (de 16 a 13 con 4+ goles) y se perfeccionó la administración del marcador una vez en ventaja (*Game States*), logrando **14 victorias por 1 gol de diferencia**.
+
+---
