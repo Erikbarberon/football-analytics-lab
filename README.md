@@ -12,7 +12,7 @@
 
 ## 📌 Acceso Rápido a las Investigaciones
 
-| ID | Título del Estudio | Foco Analítico | Dataset | Estado | Enlace Directo |
+| ID | Título del Estudio | Foco Analítico | Dataset | Estado |
 | :---: | :--- | :--- | :---: | :---: | :---: |
 | **#01** | **Jürgen Klopp: Del Caos al Control Clínico** | Varianza, Sobre-ejecución de xG y el *Efecto Alisson* | 76 Partidos (17/18 vs 19/20) | ✅ Completado
 ---
@@ -25,3 +25,10 @@ Este estudio desmitifica cuantitativamente la campaña de los **99 puntos** de l
 * **Letalidad Ofensiva (+9.80 Goles sobre xG):** El Liverpool no generó más ocasiones que en 2017/18 (75.2 xG vs 84.6 xG), sino que registró una finalización clínica de Salah y Mané, convirtiendo 85 goles a partir de oportunidades de menor volumen pero mayor calidad relativa.
 * **El Factor Alisson Becker (-6.60 xGA vs Goles Recibidos):** A pesar de conceder más peligro esperado (39.6 xGA en 19/20 frente a 35.8 xGA en 17/18), recibieron 5 goles reales menos (33 vs 38), demostrando la eficiencia decisiva del arquero brasileño en paradas de alto valor.
 * **Control del Caos y Desviación Estándar:** La desviación estándar de goles por partido se redujo drásticamente de **1.86 a 1.56**, reflejando la transformación del equipo: de partidos descontrolados y de ida y vuelta a un control riguroso de los estados de partido (*Game States*) y victorias por la mínima ventaja (14 triunfos por 1 gol de diferencia).
+
+* 👤 Autor: Erik Barberon
+Estudiante de Programación & Aspirante a Sports Data Analyst
+Mar del Plata, Argentina.
+🌐 Portfolio Live: https://erikbarberon.github.io/football-analytics-lab/
+
+Datos provistos con fines analíticos y educativos a partir de registros abiertos de Understat.
