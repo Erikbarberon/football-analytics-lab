@@ -14,7 +14,7 @@ Cada investigación integra extracción de datos en **Python**, modelado estadí
 [![Chart.js](https://img.shields.io/badge/Chart.js-4.4-FF6384?style=for-the-badge&logo=chartdotjs&logoColor=white)](https://www.chartjs.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.0+-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 
-[Dashboard en Vivo](https://<tu-usuario>.github.io/<nombre-repo>/) • [Dataset Abierto](#-datasets) • [Metodología](#️-stack-tecnológico)
+[Dashboard en Vivo](https://erikbarberon.github.io/football-analytics-lab/) • [Dataset Abierto](#-datasets) • [Metodología](#️-stack-tecnológico)
 
 ---
 
@@ -24,7 +24,7 @@ Cada investigación integra extracción de datos en **Python**, modelado estadí
 
 | ID | Proyecto | Foco Analítico | Muestra | Estado | Enlaces |
 | :---: | :--- | :--- | :---: | :---: | :---: |
-| **01** | **Jürgen Klopp: ¿Caos o Control?** | Sobre-ejecución xG, Efecto Alisson y Varianza | 76 Fechas Premier League | `Completado` | [Dashboard](https://<tu-usuario>.github.io/<nombre-repo>/studies/01-liverpool-klopp/index.html) · [Notebook](./studies/01-liverpool-klopp/analysis.ipynb) |
+| **01** | **Jürgen Klopp: ¿Caos o Control?** | Sobre-ejecución xG, Efecto Alisson y Varianza | 76 Fechas Premier League | `Completado` | [Dashboard](https://Erikbarberon.github.io/football-analytics-lab/studies/01-liverpool-klopp/index.html) · [Notebook](./studies/01-liverpool-klopp/analysis.ipynb) |
 | **02** | **Radar Sub-23: Extremos en Sudamérica** | Scouting predictivo, carreras progresivas y SCA | LPF / Brasileirão / CONMEBOL | `En Desarrollo` | *Próximamente* |
 | **03** | **Presión Alta e Intensidad PPDA** | Bloque alto, recuperaciones y peligro generado | Top 5 Ligas Europeas | `Roadmap` | *Próximamente* |
 
